@@ -5,18 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MessagingClient"
         mc:Ignorable="d"
-        Title="Send files to server" Height="270" Width="590">
+        Title="Send files to server" Height="299.333" Width="590">
     <Grid Margin="0,0,19,15">
-        <TextBox x:Name="FileName1" HorizontalAlignment="Left" Height="24" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="413"/>
-        <Button x:Name="UploadButton1" Content="Upload" HorizontalAlignment="Left" Margin="444,9,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
-        <TextBox x:Name="FileName2" HorizontalAlignment="Left" Height="24" Margin="10,55,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="413"/>
-        <Button x:Name="UploadButton2" Content="Upload" HorizontalAlignment="Left" Margin="444,54,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
-        <TextBox x:Name="FileName3" HorizontalAlignment="Left" Height="24" Margin="10,101,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="413"/>
-        <Button x:Name="UploadButton3" Content="Upload" HorizontalAlignment="Left" Margin="444,100,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
-        <TextBox x:Name="FileName4" HorizontalAlignment="Left" Height="24" Margin="10,146,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="413"/>
-        <Button x:Name="UploadButton4" Content="Upload" HorizontalAlignment="Left" Margin="444,145,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
-        <TextBox x:Name="FileName5" HorizontalAlignment="Left" Height="24" Margin="10,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="413"/>
-        <Button x:Name="UploadButton5" Content="Upload" HorizontalAlignment="Left" Margin="444,188,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
+        <Button x:Name="UploadButton1" Content="Upload" HorizontalAlignment="Left" Margin="238,39,0,0" VerticalAlignment="Top" Width="108" Height="25" Click="Button_Click"/>
+        <Label Content="Click to upload file and send it to queue" HorizontalAlignment="Left" Margin="183,7,0,0" VerticalAlignment="Top"/>
+        <ProgressBar x:Name="UploadProgress" HorizontalAlignment="Left" Height="22" Margin="167,77,0,0" VerticalAlignment="Top" Width="258"/>
+        <ListView x:Name="ServerStatusLV" HorizontalAlignment="Left" Height="100" Margin="24,155,0,0" VerticalAlignment="Top" Width="530">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label Content="Server status" HorizontalAlignment="Left" Margin="24,124,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

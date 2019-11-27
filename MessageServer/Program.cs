@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using ServiceBusHelper;
+using Topshelf;
 
 namespace MessageServer
 {
@@ -10,9 +8,13 @@ namespace MessageServer
     {
         static void Main(string[] args)
         {
-            var manager = new ServiceBusManager();
-            manager.CreateQueue();
-            manager.ReceiveAndDeleteMessage();
+            HostFactory.Run(
+               x => {
+                   x.Service(() => new FilesQueueService(new ServerSettingsDto()));
+                   x.EnableServiceRecovery(
+                            r => r.RestartService(0).RestartService(1));
+               }
+            );
         }
     }
 }

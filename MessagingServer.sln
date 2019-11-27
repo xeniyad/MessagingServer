@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagingClient", "Messagin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageServer", "MessageServer\MessageServer.csproj", "{C78A0B89-8D28-4A4F-B397-6A3487A1A697}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogHelper", "LogHelper\LogHelper.csproj", "{6AD9F3E9-9645-4B06-B152-EE1324E7C674}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusHelper", "ServiceBusHelper\ServiceBusHelper.csproj", "{1033603C-94C2-4F1F-817E-75E838730103}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C78A0B89-8D28-4A4F-B397-6A3487A1A697}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C78A0B89-8D28-4A4F-B397-6A3487A1A697}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C78A0B89-8D28-4A4F-B397-6A3487A1A697}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AD9F3E9-9645-4B06-B152-EE1324E7C674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AD9F3E9-9645-4B06-B152-EE1324E7C674}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AD9F3E9-9645-4B06-B152-EE1324E7C674}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AD9F3E9-9645-4B06-B152-EE1324E7C674}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1033603C-94C2-4F1F-817E-75E838730103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1033603C-94C2-4F1F-817E-75E838730103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1033603C-94C2-4F1F-817E-75E838730103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1033603C-94C2-4F1F-817E-75E838730103}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
