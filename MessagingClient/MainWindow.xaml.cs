@@ -22,6 +22,9 @@ namespace MessagingClient
             InitializeComponent();
             status = SBClientStatuses.WaitingForFile;
             var settings = new ClientSettingsDto();
+
+            // Неплохое решение насчет передачи Экшена UpdateProgress для апдейта прогрес-бара,
+            // однако я бы лучше сделал подписку на событие, потому что тогда SBClientManager делает слишком много вещей.
             _messageClient = new SBClientManager(settings, new ConsoleLogger(), UpdateProgress, "MyClient1");
             mainTimer = new Timer(CheckServerStatus);
             mainTimer.Change(0, settings.StatusSendPeriodMs);
@@ -58,7 +61,7 @@ namespace MessagingClient
         private void FinishSend()
         {
             Dispatcher.Invoke(new System.Action(() => UploadProgress.Value += UploadProgress.Maximum));
-            MessageBox.Show($"File sended successfully!");
+            MessageBox.Show($"File was sent successfully!");
             status = SBClientStatuses.WaitingForFile;
         }
 

@@ -51,9 +51,9 @@ namespace ServiceBusHelper
 
             _logger.LogMessage($"Message session Id: {sessionId}");
 
-             SendFileNameMessage(fileMessage.FileName, sessionId);
-                SendFilePartMessages(message, sessionId);
-                _logger.LogMessage("Done!");
+            SendFileNameMessage(fileMessage.FileName, sessionId);
+            SendFilePartMessages(message, sessionId);
+            _logger.LogMessage("Done!");
            
         }
 
@@ -83,8 +83,8 @@ namespace ServiceBusHelper
                 long arraySize = (messageBodySize - streamOffest) > SubMessageBodySize ? SubMessageBodySize : messageBodySize - streamOffest;
                 byte[] subMessageBytes = new byte[arraySize];
                 int result = bodyStream.Read(subMessageBytes, 0, (int)arraySize);
-                MemoryStream subMessageStream = new MemoryStream(subMessageBytes);
-                BrokeredMessage subMessage = new BrokeredMessage(subMessageStream, true);
+                var subMessageStream = new MemoryStream(subMessageBytes);
+                var subMessage = new BrokeredMessage(subMessageStream, true);
                 subMessage.SessionId = sessionId;
                 _queueFileClient.Send(subMessage);
                 _updateProgress.Invoke();
