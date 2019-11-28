@@ -25,13 +25,14 @@ namespace MessagingClient
 
             // Неплохое решение насчет передачи Экшена UpdateProgress для апдейта прогрес-бара,
             // однако я бы лучше сделал подписку на событие, потому что тогда SBClientManager делает слишком много вещей.
-            _messageClient = new SBClientManager(settings, new ConsoleLogger(), UpdateProgress, "MyClient1");
+            _messageClient = new SBClientManager(settings, new ConsoleLogger(), "MyClient1");
+            _messageClient.FilePartSentNotify += UpdateProgress;
+
             mainTimer = new Timer(CheckServerStatus);
             mainTimer.Change(0, settings.StatusSendPeriodMs);
             _brokerMessageSender = new BrokerMessageSender(_messageClient);
         }
 
-        
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
