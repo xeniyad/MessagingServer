@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Topshelf;
 using ServiceBusHelper;
@@ -10,19 +6,23 @@ using LogHelper;
 
 namespace MessageServer
 {
+    // Неплохая идея не использовать сервера для очередей, а написать свою.
+    // Действительно, поднимать специальный сервер для этого было бы избыточно.
     public class FilesQueueService : ServiceControl
     {
-        private readonly Timer mainTimer;
-        private readonly Timer statusTimer;
-        private SBServerManager _sbManager;
-        private const int queueListenRepeat = 20_000;
-        private ServerSettingsDto _serverSettings;
-        private ILogger _logger;
+        private readonly Timer _mainTimer;
+        private readonly Timer _statusTimer;
+        private readonly SBServerManager _sbManager;
+
+        // Непонятно, чего именно 20 тысяч. Секунд, миллисекунд?
+        private const int QueueListenRepeat = 20_000;
+        private readonly ServerSettingsDto _serverSettings;
+        private readonly ILogger _logger;
 
         public FilesQueueService(ServerSettingsDto serverSettings)
         {
-            mainTimer = new Timer(WorkProcedure);
-            statusTimer = new Timer(StatusProcedure);
+            _mainTimer = new Timer(WorkProcedure);
+            _statusTimer = new Timer(StatusProcedure);
             _logger = new ConsoleLogger();
             _sbManager = new SBServerManager(serverSettings, _logger);
             _serverSettings = serverSettings;
@@ -42,15 +42,15 @@ namespace MessageServer
 
         public bool Start(HostControl hostControl)
         {
-            mainTimer.Change(0, queueListenRepeat);
-            statusTimer.Change(0, _serverSettings.StatusSendPeriodMs);
+            _mainTimer.Change(0, QueueListenRepeat);
+            _statusTimer.Change(0, _serverSettings.StatusSendPeriodMs);
             return true;
         }
 
         public bool Stop(HostControl hostControl)
         {
-            mainTimer.Change(Timeout.Infinite, 0);
-            statusTimer.Change(Timeout.Infinite, 0);
+            _mainTimer.Change(Timeout.Infinite, 0);
+            _statusTimer.Change(Timeout.Infinite, 0);
             _sbManager.CancelOperations();
             return true;
         }

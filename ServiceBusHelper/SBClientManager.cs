@@ -8,21 +8,26 @@ namespace ServiceBusHelper
 {
     public class SBClientManager
     {
-        private static int SubMessageBodySize = 192 * 1024;
-        private QueueClient _queueFileClient;
-        private QueueClient _queueServerStatusClient;
-        private QueueClient _queueClientStatusClient;
-        private ILogger _logger;
-        private string _clientName;
-        private Action _updateProgress;
+        // Можно было бы сделать обычной константой
+        private const int SubMessageBodySize = 192 * 1024;
 
-        public SBClientManager(ClientSettingsDto clientSettings, ILogger logger, Action updateProgress, string clientName)
+        private readonly QueueClient _queueFileClient;
+        private readonly QueueClient _queueServerStatusClient;
+        private readonly QueueClient _queueClientStatusClient;
+
+        private readonly ILogger _logger;
+        private readonly string _clientName;
+
+        public delegate void FilePartSentHandler();
+        // Лучше делать уведомление клиентов через event, ведь именно для этого они и были придуманы
+        public event FilePartSentHandler FilePartSentNotify;
+
+        public SBClientManager(ClientSettingsDto clientSettings, ILogger logger, string clientName)
         {
             _logger = logger;
             _queueFileClient = QueueClient.Create(clientSettings.FilesQueueName);
             _queueServerStatusClient = QueueClient.Create(clientSettings.ServerStatusQueueName, ReceiveMode.PeekLock);
             _queueClientStatusClient = QueueClient.Create(clientSettings.ClientsStatusQueueName);
-            _updateProgress = updateProgress;
             _clientName = clientName;
 
             CreateQueue(clientSettings.FilesQueueName);
@@ -51,16 +56,19 @@ namespace ServiceBusHelper
 
             _logger.LogMessage($"Message session Id: {sessionId}");
 
-             SendFileNameMessage(fileMessage.FileName, sessionId);
-                SendFilePartMessages(message, sessionId);
-                _logger.LogMessage("Done!");
+            SendFileNameMessage(fileMessage.FileName, sessionId);
+            SendFilePartMessages(message, sessionId);
+            _logger.LogMessage("Done!");
            
         }
 
         private void SendFileNameMessage(string fileName, string sessionId)
         {
-            BrokeredMessage titleMessage = new BrokeredMessage(fileName);
-            titleMessage.SessionId = sessionId;
+            BrokeredMessage titleMessage = new BrokeredMessage(fileName)
+            {
+                SessionId = sessionId
+            };
+
             _queueFileClient.Send(titleMessage);
         }
 
@@ -78,16 +86,22 @@ namespace ServiceBusHelper
 
             Stream bodyStream = message.GetBody<Stream>();
 
-            for (int streamOffest = 0; streamOffest < messageBodySize; streamOffest += SubMessageBodySize)
+            for (int streamOffset = 0; streamOffset < messageBodySize; streamOffset += SubMessageBodySize)
             {
-                long arraySize = (messageBodySize - streamOffest) > SubMessageBodySize ? SubMessageBodySize : messageBodySize - streamOffest;
+                long arraySize = (messageBodySize - streamOffset) > SubMessageBodySize
+                    ? SubMessageBodySize
+                    : messageBodySize - streamOffset;
+
                 byte[] subMessageBytes = new byte[arraySize];
                 int result = bodyStream.Read(subMessageBytes, 0, (int)arraySize);
-                MemoryStream subMessageStream = new MemoryStream(subMessageBytes);
-                BrokeredMessage subMessage = new BrokeredMessage(subMessageStream, true);
-                subMessage.SessionId = sessionId;
+                var subMessageStream = new MemoryStream(subMessageBytes);
+                var subMessage = new BrokeredMessage(subMessageStream, true)
+                {
+                    SessionId = sessionId
+                };
+
                 _queueFileClient.Send(subMessage);
-                _updateProgress.Invoke();
+                FilePartSentNotify?.Invoke();
             }
         }
 

@@ -14,20 +14,25 @@ namespace MessagingClient
     public partial class MainWindow : Window
     {
         private SBClientStatuses status;
-        private SBClientManager _messageClient;
+        private readonly SBClientManager _messageClient;
+        private readonly BrokerMessageSender _brokerMessageSender;
         private readonly Timer mainTimer;
 
-        public MainWindow()
+        public MainWindow(ClientSettingsDto settings)
         {
             InitializeComponent();
             status = SBClientStatuses.WaitingForFile;
-            var settings = new ClientSettingsDto();
-            _messageClient = new SBClientManager(settings, new ConsoleLogger(), UpdateProgress, "MyClient1");
+
+            // Неплохое решение насчет передачи Экшена UpdateProgress для апдейта прогрес-бара,
+            // однако я бы лучше сделал подписку на событие, потому что тогда SBClientManager делает слишком много вещей.
+            _messageClient = new SBClientManager(settings, new ConsoleLogger(), "MyClient1");
+            _messageClient.FilePartSentNotify += UpdateProgress;
+
             mainTimer = new Timer(CheckServerStatus);
             mainTimer.Change(0, settings.StatusSendPeriodMs);
+            _brokerMessageSender = new BrokerMessageSender(_messageClient);
         }
 
-        
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -40,25 +45,23 @@ namespace MessagingClient
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
-               
-                var file = new Microsoft.ServiceBus.Messaging.BrokeredMessage(new FileStream(dlg.FileName, FileMode.Open));
-                var fileMessage = new FileMessage(Path.GetFileName(dlg.FileName), file);
-                Task.Factory.StartNew(() => _messageClient.Send(fileMessage))
-                            .ContinueWith((t) => FinishSend());
-                
+                _brokerMessageSender
+                    .SendFile(dlg.FileName)
+                    .ContinueWith((t) => FinishSend());
             }
-            
         }
 
         private void UpdateProgress()
         {
-            Dispatcher.Invoke(new System.Action(() => UploadProgress.Value += UploadProgress.Maximum / 7));
+            // 1. Не обязательно указывать new System.Action()
+            // 2. Не очень понятно, что за число 7, почему именно на 7 частей делится прогресс.
+            Dispatcher.Invoke(() => UploadProgress.Value += UploadProgress.Maximum / 7);
         }
 
         private void FinishSend()
         {
-            Dispatcher.Invoke(new System.Action(() => UploadProgress.Value += UploadProgress.Maximum));
-            MessageBox.Show($"File sended successfully!");
+            Dispatcher.Invoke(() => UploadProgress.Value += UploadProgress.Maximum);
+            MessageBox.Show($"File was sent successfully!");
             status = SBClientStatuses.WaitingForFile;
         }
 
@@ -66,7 +69,7 @@ namespace MessagingClient
         {
             Task.Factory.StartNew(() => _messageClient.SendClientStatus(status));
             var serverStatus = _messageClient.GetServerStatus();
-            Dispatcher.Invoke(new System.Action(() => ServerStatusLV.Items.Add(serverStatus))); 
+            Dispatcher.Invoke(() => ServerStatusLV.Items.Add(serverStatus));
         }
 
     }

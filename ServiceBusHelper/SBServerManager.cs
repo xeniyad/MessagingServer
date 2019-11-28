@@ -9,14 +9,12 @@ namespace ServiceBusHelper
 {
     public class SBServerManager
     {
-        ServerSettingsDto _serverSettings;
-        QueueClient _queueClient;
-        private QueueClient _queueServerStatusClient;
-        private QueueClient _queueClientStatusClient;
-        ILogger _logger;
-        CancellationTokenSource _cancelTokenSource;
-
-
+        private readonly ServerSettingsDto _serverSettings;
+        private readonly QueueClient _queueClient;
+        private readonly QueueClient _queueServerStatusClient;
+        private readonly QueueClient _queueClientStatusClient;
+        private readonly ILogger _logger;
+        private readonly CancellationTokenSource _cancelTokenSource;
 
         public SBServerManager(ServerSettingsDto serverSettings, ILogger logger)
         {
@@ -32,7 +30,8 @@ namespace ServiceBusHelper
             CreateQueue(_serverSettings.ClientsStatusQueueName);
         }
 
-        public void CreateQueue(string queueName)
+        // Если метод не дергается снаружи, то и выставлять его наружу "по-умолчанию" не стоит.
+        private void CreateQueue(string queueName)
         {
             var nsManager = NamespaceManager.Create();
             if (!nsManager.QueueExists(queueName))
@@ -82,7 +81,7 @@ namespace ServiceBusHelper
 
         public FileMessage ReceiveLargeMessage(CancellationTokenSource cancel)
         {
-            MemoryStream largeMessageStream = new MemoryStream();
+            var largeMessageStream = new MemoryStream();
             MessageSession session = _queueClient.AcceptMessageSession();
 
             _logger.LogMessage($"Message session Id: {session.SessionId}");
