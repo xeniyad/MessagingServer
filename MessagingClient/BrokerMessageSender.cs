@@ -8,9 +8,9 @@ namespace MessagingClient
 {
     public class BrokerMessageSender
     {
-        private readonly SBClientManager _messageClient;
+        private readonly IMessageSend _messageClient;
 
-        public BrokerMessageSender(SBClientManager messageClient)
+        public BrokerMessageSender(IMessageSend messageClient)
         {
             _messageClient = messageClient ?? throw new ArgumentNullException(nameof(messageClient));
         }

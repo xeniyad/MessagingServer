@@ -6,7 +6,7 @@ using Microsoft.ServiceBus;
 
 namespace ServiceBusHelper
 {
-    public class SBClientManager
+    public class SBClientManager : IMessageSend
     {
         // Можно было бы сделать обычной константой
         private const int SubMessageBodySize = 192 * 1024;
@@ -15,16 +15,12 @@ namespace ServiceBusHelper
         private readonly QueueClient _queueServerStatusClient;
         private readonly QueueClient _queueClientStatusClient;
 
-        private readonly ILogger _logger;
         private readonly string _clientName;
 
-        public delegate void FilePartSentHandler();
-        // Лучше делать уведомление клиентов через event, ведь именно для этого они и были придуманы
         public event FilePartSentHandler FilePartSentNotify;
 
-        public SBClientManager(ClientSettingsDto clientSettings, ILogger logger, string clientName)
+        public SBClientManager(ClientSettingsDto clientSettings, string clientName)
         {
-            _logger = logger;
             _queueFileClient = QueueClient.Create(clientSettings.FilesQueueName);
             _queueServerStatusClient = QueueClient.Create(clientSettings.ServerStatusQueueName, ReceiveMode.PeekLock);
             _queueClientStatusClient = QueueClient.Create(clientSettings.ClientsStatusQueueName);
@@ -41,11 +37,6 @@ namespace ServiceBusHelper
             if (!nsManager.QueueExists(queueName))
             {
                 nsManager.CreateQueue(queueName);
-                _logger.LogMessage($"Queue {queueName} created");
-            }
-            else
-            {
-                _logger.LogMessage($"Queue {queueName} already exist");
             }
         }
 
@@ -54,11 +45,8 @@ namespace ServiceBusHelper
             var message = fileMessage.Message;
             string sessionId = Guid.NewGuid().ToString();
 
-            _logger.LogMessage($"Message session Id: {sessionId}");
-
             SendFileNameMessage(fileMessage.FileName, sessionId);
             SendFilePartMessages(message, sessionId);
-            _logger.LogMessage("Done!");
            
         }
 
@@ -82,7 +70,6 @@ namespace ServiceBusHelper
                 nrSubMessages++;
             }
 
-            _logger.LogMessage($"Sending {0} sub-messages: {nrSubMessages}");
 
             Stream bodyStream = message.GetBody<Stream>();
 

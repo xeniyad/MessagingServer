@@ -7,22 +7,20 @@ using System.Threading;
 
 namespace ServiceBusHelper
 {
-    public class SBServerManager
+    public class SBServerManager : IMessageReceive
     {
         private readonly ServerSettingsDto _serverSettings;
         private readonly QueueClient _queueClient;
         private readonly QueueClient _queueServerStatusClient;
         private readonly QueueClient _queueClientStatusClient;
-        private readonly ILogger _logger;
         private readonly CancellationTokenSource _cancelTokenSource;
 
-        public SBServerManager(ServerSettingsDto serverSettings, ILogger logger)
+        public SBServerManager(ServerSettingsDto serverSettings)
         {
             _serverSettings = serverSettings;
             _queueClient = QueueClient.Create(serverSettings.FilesQueueName, ReceiveMode.PeekLock);
             _queueServerStatusClient = QueueClient.Create(serverSettings.ServerStatusQueueName);
             _queueClientStatusClient = QueueClient.Create(serverSettings.ClientsStatusQueueName, ReceiveMode.PeekLock);
-            _logger = logger;
             _cancelTokenSource = new CancellationTokenSource();
 
             CreateQueue(_serverSettings.FilesQueueName);
@@ -37,11 +35,6 @@ namespace ServiceBusHelper
             if (!nsManager.QueueExists(queueName))
             {
                 nsManager.CreateQueue(queueName);
-                _logger.LogMessage($"Queue {queueName} created");
-            }
-            else
-            {
-                _logger.LogMessage($"Queue {queueName} already exist");
             }
         }
 
@@ -49,13 +42,9 @@ namespace ServiceBusHelper
         {
             FileMessage largeMessage = ReceiveLargeMessage(_cancelTokenSource);
 
-            _logger.LogMessage("Received message");
-            _logger.LogMessage("Message body size: " + largeMessage.Message.Size);
-            _logger.LogMessage("Saving file: " + largeMessage.FileName);
 
             SaveMessageToFile(largeMessage);
 
-            _logger.LogMessage("Done!");
             
         }
 
@@ -84,8 +73,6 @@ namespace ServiceBusHelper
             var largeMessageStream = new MemoryStream();
             MessageSession session = _queueClient.AcceptMessageSession();
 
-            _logger.LogMessage($"Message session Id: {session.SessionId}");
-            _logger.LogMessage("Receiving sub messages");
 
             bool isFirst = true;
             string fileName = "";
@@ -118,12 +105,12 @@ namespace ServiceBusHelper
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogException(ex);
+                        
                     }
                 }
                 else
                 {
-                    _logger.LogMessage("Done!");
+                    
                     break;
                 }
             }

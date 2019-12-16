@@ -13,6 +13,7 @@ namespace ServiceBusHelper
         public string FilesQueueName { get; set; }
         public string ServerStatusQueueName { get; set; }
         public string ClientsStatusQueueName { get; set; }
+        public string LogFilePath { get; set; }
 
         public ServerSettingsDto()
         {
@@ -21,6 +22,8 @@ namespace ServiceBusHelper
             FilesQueueName = "FilesQueueSessions";
             ServerStatusQueueName = "ServerStatusQueue";
             ClientsStatusQueueName = "ClientStatusQueue";
+
+            LogFilePath = @"C:\Users\xeniya_denissova\Desktop\slogs.txt";
         }
     }
 }

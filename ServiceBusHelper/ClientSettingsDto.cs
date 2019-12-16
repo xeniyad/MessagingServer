@@ -8,6 +8,8 @@
         public string ClientsStatusQueueName { get; set; }
         public int SubMessageBodySize { get; set; }
 
+        public string LogFilePath { get; set; }
+
         public ClientSettingsDto()
         {
             StatusSendPeriodMs = 60_000;
@@ -15,6 +17,7 @@
             ServerStatusQueueName = "ServerStatusQueue";
             ClientsStatusQueueName = "ClientStatusQueue";
             SubMessageBodySize = 192 * 1024;
+            LogFilePath = @"C:\Users\xeniya_denissova\Desktop\client_logs.txt";
         }
     }
 }

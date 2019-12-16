@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileMessage.cs" />
+    <Compile Include="IMessageSend.cs" />
+    <Compile Include="IMessageRecieve.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ClientSettingsDto.cs" />
     <Compile Include="SBClientManager.cs" />

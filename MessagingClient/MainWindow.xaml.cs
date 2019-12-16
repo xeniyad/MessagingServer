@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Castle.DynamicProxy;
 using LogHelper;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ServiceBusHelper;
@@ -14,7 +15,7 @@ namespace MessagingClient
     public partial class MainWindow : Window
     {
         private SBClientStatuses status;
-        private readonly SBClientManager _messageClient;
+        private readonly IMessageSend _messageClient;
         private readonly BrokerMessageSender _brokerMessageSender;
         private readonly Timer mainTimer;
 
@@ -25,7 +26,11 @@ namespace MessagingClient
 
             // Неплохое решение насчет передачи Экшена UpdateProgress для апдейта прогрес-бара,
             // однако я бы лучше сделал подписку на событие, потому что тогда SBClientManager делает слишком много вещей.
-            _messageClient = new SBClientManager(settings, new ConsoleLogger(), "MyClient1");
+            var generator = new ProxyGenerator();
+            _messageClient =
+                generator.CreateInterfaceProxyWithTarget<IMessageSend>(
+                    new SBClientManager(settings, "MyClient1"), new LogInterceptor(settings.LogFilePath));
+            _messageClient = new SBClientManager(settings, "MyClient1");
             _messageClient.FilePartSentNotify += UpdateProgress;
 
             mainTimer = new Timer(CheckServerStatus);

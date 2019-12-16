@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Topshelf;
 using ServiceBusHelper;
 using LogHelper;
+using Castle.DynamicProxy;
 
 namespace MessageServer
 {
@@ -12,31 +13,35 @@ namespace MessageServer
     {
         private readonly Timer _mainTimer;
         private readonly Timer _statusTimer;
-        private readonly SBServerManager _sbManager;
 
         // Непонятно, чего именно 20 тысяч. Секунд, миллисекунд?
         private const int QueueListenRepeat = 20_000;
         private readonly ServerSettingsDto _serverSettings;
         private readonly ILogger _logger;
+        private IMessageReceive _messageReceive;
 
         public FilesQueueService(ServerSettingsDto serverSettings)
         {
             _mainTimer = new Timer(WorkProcedure);
             _statusTimer = new Timer(StatusProcedure);
             _logger = new ConsoleLogger();
-            _sbManager = new SBServerManager(serverSettings, _logger);
+            var generator = new ProxyGenerator();
+           
             _serverSettings = serverSettings;
+            _messageReceive =
+               generator.CreateInterfaceProxyWithTarget<IMessageReceive>(
+                   new SBServerManager(serverSettings), new LogInterceptor(_serverSettings.LogFilePath));
         }
 
         private void WorkProcedure(object target)
         {
-            Task.Factory.StartNew(() => _sbManager.ReceiveMessage());
+            Task.Factory.StartNew(() => _messageReceive.ReceiveMessage());
         }
 
         private void StatusProcedure(object target)
         {
-            Task.Factory.StartNew(() => _sbManager.SendServerStatus(SBServerStatuses.Working));
-            Task.Factory.StartNew(() => _sbManager.GetClientsStatuses())
+            Task.Factory.StartNew(() => _messageReceive.SendServerStatus(SBServerStatuses.Working));
+            Task.Factory.StartNew(() => _messageReceive.GetClientsStatuses())
                         .ContinueWith((t) => _logger.LogMessage(t.GetAwaiter().GetResult()));
         }
 
@@ -51,7 +56,7 @@ namespace MessageServer
         {
             _mainTimer.Change(Timeout.Infinite, 0);
             _statusTimer.Change(Timeout.Infinite, 0);
-            _sbManager.CancelOperations();
+            _messageReceive.CancelOperations();
             return true;
         }
     }
