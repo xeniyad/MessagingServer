@@ -24,15 +24,11 @@ namespace MessagingClient
             InitializeComponent();
             status = SBClientStatuses.WaitingForFile;
 
-            // Неплохое решение насчет передачи Экшена UpdateProgress для апдейта прогрес-бара,
-            // однако я бы лучше сделал подписку на событие, потому что тогда SBClientManager делает слишком много вещей.
             var generator = new ProxyGenerator();
             _messageClient =
                 generator.CreateInterfaceProxyWithTarget<IMessageSend>(
                     new SBClientManager(settings, "MyClient1"), new LogInterceptor(settings.LogFilePath));
-            _messageClient = new SBClientManager(settings, "MyClient1");
             _messageClient.FilePartSentNotify += UpdateProgress;
-
             mainTimer = new Timer(CheckServerStatus);
             mainTimer.Change(0, settings.StatusSendPeriodMs);
             _brokerMessageSender = new BrokerMessageSender(_messageClient);
