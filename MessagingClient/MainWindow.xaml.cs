@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Castle.DynamicProxy;
 using LogHelper;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ServiceBusHelper;
@@ -24,10 +23,7 @@ namespace MessagingClient
             InitializeComponent();
             status = SBClientStatuses.WaitingForFile;
 
-            var generator = new ProxyGenerator();
-            _messageClient =
-                generator.CreateInterfaceProxyWithTarget<IMessageSend>(
-                    new SBClientManager(settings, "MyClient1"), new LogInterceptor(settings.LogFilePath));
+            _messageClient =  new SBClientManager(settings, "MyClient1");
             _messageClient.FilePartSentNotify += UpdateProgress;
             mainTimer = new Timer(CheckServerStatus);
             mainTimer.Change(0, settings.StatusSendPeriodMs);

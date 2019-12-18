@@ -28,9 +28,7 @@ namespace MessageServer
             var generator = new ProxyGenerator();
            
             _serverSettings = serverSettings;
-            _messageReceive =
-               generator.CreateInterfaceProxyWithTarget<IMessageReceive>(
-                   new SBServerManager(serverSettings), new LogInterceptor(_serverSettings.LogFilePath));
+            _messageReceive = new SBServerManager(serverSettings);
         }
 
         private void WorkProcedure(object target)

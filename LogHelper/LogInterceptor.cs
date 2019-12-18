@@ -1,38 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Castle.DynamicProxy;
+using PostSharp.Aspects;
 using System.Text.Json;
 using System.IO;
 
 namespace LogHelper
 {
-    public class LogInterceptor : IInterceptor
+    [Serializable]
+    public class LogPostSharp : OnMethodBoundaryAspect
     {
-        public LogInterceptor(string path)
-        {
-            _path = path;
-        }
+        string _path = @"C:\Users\xeniya_denissova\Desktop\slogs.txt";
 
-        string _path;
-        public static readonly object locker = new object();
-        private System.Threading.Mutex mutex = new System.Threading.Mutex();
 
-        public void Intercept(IInvocation invocation)
+        public override void OnEntry(MethodExecutionArgs invocation)
         {
             var args = invocation.Arguments;
             var method = invocation.Method;
             var time = DateTime.Now;
             string json = JsonSerializer.Serialize(args);
+            object locker = new object();
+            System.Threading.Mutex mutex = new System.Threading.Mutex();
             mutex.WaitOne();
-            lock (locker) {
+            lock (locker)
+            {
                 if (File.Exists(_path))
                 {
                     File.AppendAllText(_path, $"\n {time} Method name: {method.Name} \n arguments: {json}");
                 }
             }
             mutex.ReleaseMutex();
-            invocation.Proceed();
+            invocation.FlowBehavior = FlowBehavior.Default;
         }
     }
 }

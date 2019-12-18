@@ -28,7 +28,7 @@ namespace ServiceBusHelper
             CreateQueue(_serverSettings.ClientsStatusQueueName);
         }
 
-        // Если метод не дергается снаружи, то и выставлять его наружу "по-умолчанию" не стоит.
+        [LogPostSharp]
         private void CreateQueue(string queueName)
         {
             var nsManager = NamespaceManager.Create();
@@ -47,7 +47,7 @@ namespace ServiceBusHelper
 
             
         }
-
+        [LogPostSharp]
         private void SaveMessageToFile(FileMessage largeMessage)
         {
             string folderPath = _serverSettings.FolderPath;
@@ -58,7 +58,7 @@ namespace ServiceBusHelper
             fileOut.Close();
         }
 
-
+        [LogPostSharp]
         public void CancelOperations()
         {
             SendServerStatus(SBServerStatuses.Stopped);
@@ -67,7 +67,7 @@ namespace ServiceBusHelper
             _queueServerStatusClient.Close();
             _queueClientStatusClient.Close();
         }
-
+        [LogPostSharp]
         public FileMessage ReceiveLargeMessage(CancellationTokenSource cancel)
         {
             var largeMessageStream = new MemoryStream();
@@ -118,12 +118,12 @@ namespace ServiceBusHelper
             
             return new FileMessage(fileName, largeMessage);
         }
-
+        [LogPostSharp]
         public void SendServerStatus(SBServerStatuses status)
         {
             _queueServerStatusClient.Send(new BrokeredMessage($"{DateTime.Now}: Server has status {status}"));
         }
-
+        [LogPostSharp]
         public string GetClientsStatuses()
         {
             var message = _queueClientStatusClient.Receive();

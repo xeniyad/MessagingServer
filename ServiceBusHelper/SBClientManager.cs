@@ -30,7 +30,7 @@ namespace ServiceBusHelper
             CreateQueue(clientSettings.ServerStatusQueueName);
             CreateQueue(clientSettings.ClientsStatusQueueName);
         }
-
+        [LogPostSharp]
         public void CreateQueue(string queueName)
         {
             var nsManager = NamespaceManager.Create();
@@ -39,7 +39,7 @@ namespace ServiceBusHelper
                 nsManager.CreateQueue(queueName);
             }
         }
-
+        [LogPostSharp]
         public void Send(FileMessage fileMessage)
         {
             var message = fileMessage.Message;
@@ -49,7 +49,7 @@ namespace ServiceBusHelper
             SendFilePartMessages(message, sessionId);
            
         }
-
+        [LogPostSharp]
         private void SendFileNameMessage(string fileName, string sessionId)
         {
             BrokeredMessage titleMessage = new BrokeredMessage(fileName)
